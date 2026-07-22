@@ -50,51 +50,70 @@ It enables flexible data transformation through a template-driven approach, and 
 ├── [README.ja.md](README.ja.md)  
 ├── [README.md](README.md)  
 ├── config/  
-│&nbsp;&nbsp;&nbsp; ├── [replace.yaml](config/replace.yaml)  
+│&nbsp;&nbsp;&nbsp;├── [replace.yaml](config/replace.yaml)  
 │&nbsp;&nbsp;&nbsp;├── [settings.yaml](config/settings.yaml)  
 │&nbsp;&nbsp;&nbsp;└── stg/  
-│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [replace_ec2.yaml](config/stg/replace_ec2.yaml)  
-│&nbsp;&nbsp;& nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [settings-ec2.yaml](config/stg/settings-ec2.yaml)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [replace_ec2.yaml](config/stg/replace_ec2.yaml)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [settings-ec2.yaml](config/stg/settings-ec2.yaml)  
 ├── input/  
 │&nbsp;&nbsp;&nbsp;└── ec2/  
-│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └── [EC2.xlsx](input/ec2/EC2.xlsx)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [EC2.xlsx](input/ec2/EC2.xlsx)  
+├── output/  
+│&nbsp;&nbsp;&nbsp;├── dev/  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── EC2/  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── dev-20260706134946/  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── json/  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [result_EC2.json](output/dev/EC2/dev-20260706134946/json/result_EC2.json)  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [result_all.json](output/dev/EC2/dev-20260706134946/json/result_all.json)  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── reports/  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [compare_report.md](output/dev/EC2/dev-20260706134946/reports/compare_report.md)  
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [compare_summary.json](output/dev/EC2/dev-20260706134946/reports/compare_summary.json)  
+│&nbsp;&nbsp;&nbsp;└── stg/  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── EC2/  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── stg-20260706135355/  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── json/  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [result_EC2.json](output/stg/EC2/stg-20260706135355/json/result_EC2.json)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [result_all.json](output/stg/EC2/stg-20260706135355/json/result_all.json)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── reports/  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [compare_report.md](output/stg/EC2/stg-20260706135355/reports/compare_report.md)  
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [compare_summary.json](output/stg/EC2/stg-20260706135355/reports/compare_summary.json)  
 ├── [requirements.txt](requirements.txt)  
 └── src/  
 &nbsp;&nbsp;&nbsp;&nbsp;├── [cli.py](src/cli.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── collector/  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp; ├── [__init__.py](src/collector/__init__.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└ ── [aws_collector.py](src/collector/aws_collector.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/collector/__init__.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [aws_collector.py](src/collector/aws_collector.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── comparator/  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/comparator/__init__.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp; &nbsp;&nbsp;├── [comparator.py](src/comparator/comparator.py)  
-&nbsp; &nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [report_generator.py](src/comparator/report_generator.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [comparator.py](src/comparator/comparator.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [report_generator.py](src/comparator/report_generator.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── core/  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/core/__init__.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [config_validator.py](src/core/config_validator.py)  
-&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;├── [data_processor.py](src/core/data_processor.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp; ├── [excel_reader.py](src/core/excel_reader.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp; └── [header_processor.py](src/core/header_processor.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [data_processor.py](src/core/data_processor.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [excel_reader.py](src/core/excel_reader.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [header_processor.py](src/core/header_processor.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── [init.py](src/init.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── [main.py](src/main.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── models/  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [resource.py](src/models/resource.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└ ── [sheet_context.py](src/models/sheet_context.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [sheet_context.py](src/models/sheet_context.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── normalizer/  
-&nbsp;&nbsp; &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/normalizer/__init__.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp; &nbsp;&nbsp;├── [aws_normalizer.py](src/normalizer/aws_normalizer.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp; &nbsp;└── [expected_normalizer.py](src/normalizer/expected_normalizer.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/normalizer/__init__.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [aws_normalizer.py](src/normalizer/aws_normalizer.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [expected_normalizer.py](src/normalizer/expected_normalizer.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;├── output/  
-&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├─ ─ [__init__.py](src/output/__init__.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [__init__.py](src/output/__init__.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [json_generator.py](src/output/json_generator.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── [template_builder.py](src/output/template_builder.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── [template_engine.py](src/output/template_engine.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;└── utils/  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├── [__init__.py](src/utils/__init__.py)  
-├── [excel_utils.py](src/utils/excel_utils.py)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├── [string_utils.py](src/utils/string_utils.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [__init__.py](src/utils/__init__.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [excel_utils.py](src/utils/excel_utils.py)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [string_utils.py](src/utils/string_utils.py)  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── [validation.py](src/utils/validation.py)  
 
-12 directories, 35 files  
+23 directories, 43 files  
 <!-- END_TREE -->
 
 ---
