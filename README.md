@@ -529,9 +529,7 @@ Please feel free to contact us if you encounter any of the following issues.
 Leveraging the agility unique to independent development, we offer flexible support—from signing NDAs (Non-Disclosure Agreements) to issuing customized quotes and invoices.
 We welcome casual inquiries, such as “Can this be used in this way?”
 
-* **Contact (Developer):**  Y. Fukumori
-
-* **Contact Information (LinkedIn):**  www.linkedin.com/in/8alfalfa8
+* **Contact (Developer):**  Y. Fukumori (💼 [LinkedIn](https://www.linkedin.com/in/8alfalfa8))
 
 * **Availability:**  Weekday evenings, weekends, and holidays (Emails are accepted 24 hours a day; we will reply within 2 business days)
 
