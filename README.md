@@ -44,7 +44,7 @@ It enables flexible data transformation through a template-driven approach, and 
   - In all other cases, returns exit code 1 (abnormal termination).
 
 ---
-
+## Project Structure
 <!-- START_TREE -->
 ├── [LICENSE](LICENSE)  
 ├── [README.ja.md](README.ja.md)  
