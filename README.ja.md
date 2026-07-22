@@ -544,9 +544,11 @@ ERROR - Failed to process input/cw_alarm\~$XXXXXX.xlsx: [Errno 13] Permission de
 個人開発ならではのフットワークの軽さで、NDA（秘密保持契約）の締結から、個別のお見積書・請求書の発行まで柔軟に対応いたします。
 まずは「こういった使い方はできるか？」というカジュアルなご相談から大歓迎です。
 
+## 🌐 Follow Me
+
 * **担当者（開発者）:**  Y.Fukumori
 
-* **連絡先 (LinkedIn:):**  www.linkedin.com/in/8alfalfa8
+* 💼 [LinkedIn](https://www.linkedin.com/in/8alfalfa8)
 
 * **対応可能時間:**  平日夜間、土日祝日（メールは24時間受付、2営業日以内にご返信いたします）
 
