@@ -1,0 +1,134 @@
+[
+  {
+    "source": {
+      "file": "EC2.xlsx",
+      "sheet": "EC2",
+      "row_index": "11",
+      "env": "stg"
+    },
+    "data": {
+      "InstanceName": "XXXSMON0001S",
+      "AvailabilityZone": "ap-northeast-1a",
+      "AMI-ID": "ami-01b394144003a8283",
+      "InstanceType": "m7i.large",
+      "KeyName": "xxx-stg-ec2-keypair-common",
+      "VPCID": "vpc-012dda1f0340ffc45",
+      "SubnetID": "subnet-067dfb85f74c94f6b",
+      "EbsOptimized": "True",
+      "IamInstanceProfile": "{\"Id\": \"AIPAQDHGKHMKS7BHEA7GL\", \"Arn\": \"xxx-stg-iam-profile-mon-ec2-ZabbixServer\"}",
+      "Monitoring": "{\"State\": \"disabled\"}",
+      "PrivateDnsNameOptions": "{\"EnableResourceNameDnsAAAARecord\": \"False\", \"EnableResourceNameDnsARecord\": \"True\", \"HostnameType\": \"ip-name\"}",
+      "SourceDestCheck": "True",
+      "Tags": "[{\"Key\": \"Name\", \"Value\": \"XXXSMON0001S\"}, {\"Key\": \"SystemName\", \"Value\": \"xxx\"}]"
+    },
+    "_metadata": {
+      "version": "1.0",
+      "generated_by": "spec2clouds",
+      "column_count": 18
+    },
+    "enabled": true,
+    "_template_id": "EC2",
+    "_source_file": "EC2.xlsx",
+    "_source_sheet": "EC2",
+    "_row_index": 1
+  },
+  {
+    "source": {
+      "file": "EC2.xlsx",
+      "sheet": "EC2",
+      "row_index": "12",
+      "env": "stg"
+    },
+    "data": {
+      "InstanceName": "XXXSMON0002S",
+      "AvailabilityZone": "ap-northeast-1c",
+      "AMI-ID": "ami-01b394144003a8283",
+      "InstanceType": "m7i.large",
+      "KeyName": "xxx-stg-ec2-keypair-common",
+      "VPCID": "vpc-012dda1f0340ffc45",
+      "SubnetID": "subnet-06f2e7a2fd4a848d6",
+      "EbsOptimized": "True",
+      "IamInstanceProfile": "{\"Id\": \"AIPAQDHGKHMKS7BHEA7GL\", \"Arn\": \"xxx-stg-iam-profile-mon-ec2-ZabbixServer\"}",
+      "Monitoring": "{\"State\": \"disabled\"}",
+      "PrivateDnsNameOptions": "{\"EnableResourceNameDnsAAAARecord\": \"False\", \"EnableResourceNameDnsARecord\": \"True\", \"HostnameType\": \"ip-name\"}",
+      "SourceDestCheck": "True",
+      "Tags": "[{\"Key\": \"Name\", \"Value\": \"XXXSMON0002S\"}, {\"Key\": \"SystemName\", \"Value\": \"xxx\"}]"
+    },
+    "_metadata": {
+      "version": "1.0",
+      "generated_by": "spec2clouds",
+      "column_count": 18
+    },
+    "enabled": true,
+    "_template_id": "EC2",
+    "_source_file": "EC2.xlsx",
+    "_source_sheet": "EC2",
+    "_row_index": 2
+  },
+  {
+    "source": {
+      "file": "EC2.xlsx",
+      "sheet": "EC2",
+      "row_index": "13",
+      "env": "stg"
+    },
+    "data": {
+      "InstanceName": "XXXSLOG0001S",
+      "AvailabilityZone": "ap-northeast-1a",
+      "AMI-ID": "ami-01b394144003a8283",
+      "InstanceType": "m6i.8xlarge",
+      "KeyName": "xxx-stg-ec2-keypair-common",
+      "VPCID": "vpc-012dda1f0340ffc45",
+      "SubnetID": "subnet-067dfb85f74c94f6b",
+      "EbsOptimized": "True",
+      "IamInstanceProfile": "{\"Id\": \"AIPAQDHGKHMKVMRYKJW4Q\", \"Arn\": \"xxx-stg-iam-profile-mon-ec2-SyslogServer\"}",
+      "Monitoring": "{\"State\": \"disabled\"}",
+      "PrivateDnsNameOptions": "{\"EnableResourceNameDnsAAAARecord\": \"False\", \"EnableResourceNameDnsARecord\": \"True\", \"HostnameType\": \"ip-name\"}",
+      "SourceDestCheck": "True",
+      "Tags": "[{\"Key\": \"Name\", \"Value\": \"XXXSLOG0001S\"}, {\"Key\": \"SystemName\", \"Value\": \"xxx\"}]"
+    },
+    "_metadata": {
+      "version": "1.0",
+      "generated_by": "spec2clouds",
+      "column_count": 18
+    },
+    "enabled": true,
+    "_template_id": "EC2",
+    "_source_file": "EC2.xlsx",
+    "_source_sheet": "EC2",
+    "_row_index": 3
+  },
+  {
+    "source": {
+      "file": "EC2.xlsx",
+      "sheet": "EC2",
+      "row_index": "14",
+      "env": "stg"
+    },
+    "data": {
+      "InstanceName": "XXXSLOG0002S",
+      "AvailabilityZone": "ap-northeast-1c",
+      "AMI-ID": "ami-01b394144003a8283",
+      "InstanceType": "m7i.large",
+      "KeyName": "xxx-stg-ec2-keypair-common",
+      "VPCID": "vpc-012dda1f0340ffc45",
+      "SubnetID": "subnet-06f2e7a2fd4a848d6",
+      "EbsOptimized": "True",
+      "IamInstanceProfile": "{\"Id\": \"AIPAQDHGKHMKVMRYKJW4Q\", \"Arn\": \"xxx-stg-iam-profile-mon-ec2-SyslogServer\"}",
+      "Monitoring": "{\"State\": \"disabled\"}",
+      "PrivateDnsNameOptions": "{\"EnableResourceNameDnsAAAARecord\": \"False\", \"EnableResourceNameDnsARecord\": \"True\", \"HostnameType\": \"ip-name\"}",
+      "SourceDestCheck": "True",
+      "Tags": "[{\"Key\": \"Name\", \"Value\": \"XXXSLOG0002S\"}, {\"Key\": \"SystemName\", \"Value\": \"xxx\"}]"
+    },
+    "_metadata": {
+      "version": "1.0",
+      "generated_by": "spec2clouds",
+      "column_count": 18
+    },
+    "enabled": true,
+    "_template_id": "EC2",
+    "_source_file": "EC2.xlsx",
+    "_source_sheet": "EC2",
+    "_row_index": 4
+  }
+]

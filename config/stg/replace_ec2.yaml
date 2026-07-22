@@ -1,0 +1,69 @@
+# config\stg\replace-ec2.yaml
+# EC2用の置換ルール
+# 置換ルールと処理の関連付け設定：
+#    config\settings-ec2.yaml
+#      replace_rules:
+#            mapping:
+# 設定説明：
+#   - source:置換前の文字列
+#     condition: partial         (partial: 部分置換 / exact: 一致置換)
+#     replacement: 置換後の文字列
+#
+
+# 不要な「ブランク」文字列を削除
+- source: "ブランク"
+  condition: exact
+  replacement: ""
+
+# ハイフンだけの項目を削除
+- source: "-"
+  condition: exact
+  replacement: ""
+
+# []だけの項目を削除
+- source: "[]"
+  condition: exact
+  replacement: ""
+
+# (なし)だけの項目を削除
+- source: "(なし)"
+  condition: exact
+  replacement: ""
+
+# {prd|reh|stg}を実際の値に置換
+- source: "{prd|reh|stg}"
+  condition: partial
+  replacement: "{env_long}"
+
+# {P|R|S}を実際の値に置換
+- source: "{P|R|S}"
+  condition: partial
+  replacement: "{env_short}"
+
+- source: "｛共通基盤VPC ID｝"
+  condition: partial
+  replacement: "vpc-012dda1f0340ffc45"
+
+- source: "｛共通基盤Subnet ID｝"
+  condition: partial
+  replacement: "subnet-067dfb85f74c94f6b"
+
+- source: "｛共通基盤Subnet ID2｝"
+  condition: partial
+  replacement: "subnet-06f2e7a2fd4a848d6"
+
+- source: "{IamInstanceProfile-ID}"
+  condition: partial
+  replacement: "AIPAQDHGKHMKS7BHEA7GL"
+
+- source: "arn:aws:iam::006925466389:instance-profile/xxx-stg-iam-profile-mon-ec2-ZabbixServer"
+  condition: partial
+  replacement: "xxx-stg-iam-profile-mon-ec2-ZabbixServer"
+
+- source: "{IamInstanceProfile-ID2}"
+  condition: partial
+  replacement: "AIPAQDHGKHMKVMRYKJW4Q"
+
+- source: "arn:aws:iam::006925466389:instance-profile/xxx-stg-iam-profile-mon-ec2-SyslogServer"
+  condition: partial
+  replacement: "xxx-stg-iam-profile-mon-ec2-SyslogServer"

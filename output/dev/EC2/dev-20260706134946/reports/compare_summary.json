@@ -1,0 +1,12 @@
+{
+  "file": "EC2.xlsx",
+  "execution_time": "2026-07-06 13:49:46 JST",
+  "resources": {
+    "EC2": {
+      "matched": 1,
+      "modified": 1,
+      "missing": 0,
+      "extra": "hidden"
+    }
+  }
+}

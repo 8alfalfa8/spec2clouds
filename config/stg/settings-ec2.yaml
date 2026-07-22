@@ -1,0 +1,100 @@
+# config\stg\settings-ec2.yaml
+# ============================================================
+# spec2cloud stg設定ファイル
+# ============================================================
+
+# --- 環境指定 ---
+env: "stg"                         # {prd|reh|stg|dev} または、{P|R|S|D}対応
+
+# --- 入出力設定 ---
+input:
+  directory: "input/ec2"           # 入力Excelファイルのフォルダ
+  file_pattern: "*.xlsx"           # 処理対象ファイルパターン
+
+output:
+  directory: "output/stg"          # 出力フォルダ
+  file_prefix: "result"            # 出力ファイル接頭辞
+  combine_all: true                # 全ファイル統合JSONを出力するか
+
+# --- テンプレート設定 ---
+template:
+  auto_generate: true              # テンプレート自動生成を有効にするか
+  auto_generate_only: false        # 自動生成のみ行い、通常処理はスキップするか
+  id_cell: "C5"                    # テンプレートIDが記載されたセル
+  directory: "templates/ec2"       # テンプレートファイルのフォルダ
+  mapping:                         # AWSサービスID → テンプレートファイル名
+    "EC2": "EC2.json"
+
+# --- 正規化設定 ---
+normalize:
+  unicode_form: ""                 # デフォルト NFKC (NFC/NFKC/NFD/NFKD)
+  regex_escape: false              # デフォルト true
+
+# --- 検証対象シート設定 ---
+target_sheets:
+  - "EC2"
+
+# --- ヘッダー設定 ---
+header:
+  start_row: 7                     # ヘッダー開始行（1始まり）
+  max_levels: 3                    # ヘッダーの最大階層数
+  start_string: ""                 # 開始列の文字列（空=非空セル）
+  end_string: "Remarks"            # 終了列の文字列（空=空セル）
+  fill_empty_cells: true           # 空セルを上位/前方から補完
+
+# --- データ設定 ---
+data:
+  data_start_row: 11               # データ開始行（1始まり、空=ヘッダー終了行+1）
+  end_row_string: "Remarks"        # データ終了の先頭セル文字列（空=空セル）
+  termination:
+    empty_row_threshold: 2         # データ終了とみなす連続空行数
+
+  # --- 列制御設定 ---
+  column_control:
+    row: 6                         # 制御行（1始まり、0=無効）
+    exclude_value: "0"             # 除外を示す値
+
+  # --- データ行制御設定 ---
+  invalid_row_control:
+    column: "AB"                   # 判定列
+    invalid_value: "0"             # この値なら無効
+    output_field: "enabled"        # 無効行の判定結果を出力するフィールド名
+    valid_output: true             # 有効行の判定値
+    invalid_output: false          # 無効行の判定値
+    skip_invalid_rows: false       # 無効行を出力からスキップするか
+
+# --- 比較設定 ---
+compare:
+  enabled: true                    # 比較を実行するか
+  show_extra_resources: false      # true なら第6章表示、false なら非表示
+  timezone: "Asia/Tokyo"           # デフォルト：東京
+  aws:
+    region: "ap-northeast-1"
+    profile: VSG-Stg               # AWSプロファイル名（nullならデフォルト）
+  resources:                       # 比較対象のAWSサービスIDリスト
+    - "EC2"
+
+# --- 置換ルール設定 ---
+replace_rules:
+  mapping:
+    "EC2": "replace_ec2.yaml"
+
+# --- json：Key-Value マッピング設定 ---
+json:
+  key_value_mappings:
+    Dimensions:
+      key_field: Name
+      value_field: Value
+    Metrics:
+      key_field: Name
+      value_field: Value
+    Tags:
+      key_field: Key
+      value_field: Value
+    "*":
+      key_field: Key
+      value_field: Value
+
+  # 数字データは文字列として処理する項目のパスを指定
+  preserve_string_paths:
+    - Metrics.AccountId
