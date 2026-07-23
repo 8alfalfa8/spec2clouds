@@ -1,0 +1,127 @@
+# .github/workflows/readme2index.yaml
+#   GitHub Actions により index.html を自動生成する。
+#
+# ■メリット
+#   ・READMEとHTMLの二重管理が不要
+#   ・GitHub Pagesへそのまま公開可能
+#   ・PushするだけでHTMLが最新化される
+#   ・MathJaxやMermaidにも対応
+#
+# ■処理概要
+#   README.md
+#        ↓
+#   PandocでHTML生成
+#        ↓
+#   MathJax設定追加
+#        ↓
+#   Mermaid設定追加
+#        ↓
+#   CSS追加
+#        ↓
+#   index.html生成
+#        ↓
+#   自動Commit
+#
+# ※ 現在は README.md のみ対応しています。
+#    日本語版（README.ja.md）やその他の多言語READMEへの対応も可能です。
+#    ご要望がありましたらお気軽にご連絡ください。
+# =============================================================================
+name: Update index.html from README
+
+# README.md が更新された場合のみ実行する。
+# 不要なWorkflow実行を防ぎ、実行時間を短縮する。
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+
+  # GitHub画面から手動実行も可能
+  workflow_dispatch:
+
+jobs:
+  convert:
+    # Ubuntu最新版でWorkflowを実行
+    runs-on: ubuntu-latest
+    # index.html を更新・Commitするため
+    permissions:
+      contents: write
+
+    steps:
+      # リポジトリをチェックアウト
+      # README.md を変換対象として取得する。
+      - name: Checkout code
+        uses: actions/checkout@v6
+      # -----------------------------------------------------------------------------
+      # Pandoc をインストール
+      # MarkdownからHTMLを生成するためのツール。
+      # -----------------------------------------------------------------------------
+      - name: Install Pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+
+      - name: Convert README.md to index.html
+        run: |
+          # Pandocで基本のHTMLを生成
+          # --mathjax フラグで数式記法を保護します
+          pandoc README.md -s --mathjax \
+          --metadata title="プロジェクト概要" \
+          -o index.html
+
+      # -----------------------------------------------------------------------------
+      # HTMLへ追加するスクリプトを生成
+      #
+      # ・MathJax設定
+      # ・Mermaid
+      # ・最低限のCSS
+      #
+      # をまとめて scripts.html に作成する。
+      # -----------------------------------------------------------------------------
+      - name: Inject Scripts (MathJax Config & Mermaid)
+        run: |
+          # MathJaxが $ や \( を正しく解釈するための設定スクリプトを作成
+          cat <<EOF > scripts.html
+          <script>
+            window.MathJax = {
+              tex: {
+                inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+                displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+                processEscapes: true
+              },
+              options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+              }
+            };
+          </script>
+          <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+          <script type="module">
+            import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+            mermaid.initialize({
+              startOnLoad: true,
+              theme: 'default'
+            });
+          </script>
+          <style>
+            /* 見栄えを良くするための最小限のスタイル */
+            body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; color: #333; }
+            pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 5px; }
+            code { font-family: monospace; background: #eee; padding: 0.2rem 0.4rem; border-radius: 3px; }
+          </style>
+          EOF
+
+          # index.htmlの</body>直前にスクリプトとスタイルを挿入
+          sed -i '/<\/body>/e cat scripts.html' index.html
+
+      # -----------------------------------------------------------------------------
+      # index.html に変更があった場合のみCommitする。
+      #
+      # 不要なCommit履歴を増やさないようにしている。
+      # -----------------------------------------------------------------------------
+      - name: Commit and Push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html
+          # 変更がある場合のみコミット
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update index.html from README.md" && git push)
