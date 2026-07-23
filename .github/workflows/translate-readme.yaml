@@ -1,0 +1,234 @@
+# .github/workflows/translate-readme.yaml
+# =============================================================================
+# README.ja.md を英語版 README.md に自動翻訳する Workflow
+#
+# ■目的
+#   日本語版 README を編集するだけで、
+#   GitHub Actions が DeepL API を利用して英語版 README.md を自動生成する。
+#
+# ■メリット
+#   ・翻訳漏れを防止
+#   ・READMEの保守コスト削減
+#   ・OSS公開時の多言語対応
+#
+# ■処理概要
+#   README.ja.md
+#        ↓
+#   DeepL API翻訳
+#        ↓
+#   README.md生成
+#        ↓
+#   日本語READMEへのリンク追加
+#        ↓
+#   出力検証
+#        ↓
+#   自動Commit
+# =============================================================================
+name: Translate README to English
+
+# README.ja.md が更新された場合のみ実行する。
+# 不要なWorkflow実行を防ぎ、GitHub Actionsの実行回数を削減する。
+on:
+  push:
+    branches:
+      - main
+      # - stg
+    paths:
+      - 'README.ja.md'
+
+  # GitHub画面から手動実行も可能。
+  # 将来的に翻訳エンジンを追加できるよう
+  # translatorパラメータを用意している。
+  workflow_dispatch:
+    inputs:
+      translator:
+        description: '使用する翻訳エンジンを選択してください'
+        required: true
+        default: 'deepl'
+        type: choice
+        options:
+          - deepl
+
+# Ubuntu最新版でWorkflowを実行
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    # README.mdを書き換えてCommitするため
+    permissions:
+      contents: write
+
+    # ソースコードを取得
+    # README.ja.md を翻訳対象として利用する。
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # -----------------------------------------------------------------------------
+      # README.ja.md の存在確認
+      #
+      # ・存在しない場合
+      # ・空ファイルの場合
+      #
+      # は誤ったREADME.mdが生成されるためWorkflowを終了する。
+      # -----------------------------------------------------------------------------
+      - name: Verify source file exists
+        run: |
+          echo "=== Checking README.ja.md ==="
+          if [ ! -f "README.ja.md" ]; then
+            echo "Error: README.ja.md not found!"
+            exit 1
+          fi
+          FILE_SIZE=$(wc -c < README.ja.md)
+          echo "File size: $FILE_SIZE bytes"
+          if [ "$FILE_SIZE" -eq 0 ]; then
+            echo "Error: README.ja.md is empty!"
+            exit 1
+          fi
+          echo "First 200 chars of README.ja.md:"
+          head -c 200 README.ja.md
+          echo ""
+          echo "File check passed."
+
+      # -----------------------------------------------------------------------------
+      # 使用する翻訳エンジンを決定
+      #
+      # 現在は DeepL のみ対応。
+      # 将来的には OpenAI / Gemini / Claude 等も
+      # 同一Workflowで切り替えられる設計としている。
+      # -----------------------------------------------------------------------------
+      - name: Determine Translator Engine
+        id: select-engine
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "engine=${{ inputs.translator }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "engine=deepl" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Selected engine: $(cat "$GITHUB_OUTPUT" | grep engine)"
+
+      # -----------------------------------------------------------------------------
+      # DeepL APIを利用してREADME全体を翻訳する
+      #
+      # APIから返却されるJSON例
+      #
+      # {
+      #   "translations":[
+      #      {
+      #         "text":"Translated text..."
+      #      }
+      #   ]
+      # }
+      #
+      # translations[0].text を README.md に保存する。
+      #
+      # エラー発生時は message を検知してWorkflowを停止する。
+      # -----------------------------------------------------------------------------
+      - name: Translate via DeepL
+        if: ${{ steps.select-engine.outputs.engine == 'deepl' }}
+        env:
+          DEEPL_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          set -e
+          echo "Translating README using DeepL API..."
+          response=$(curl -s -X POST "https://api-free.deepl.com/v2/translate"             -H "Authorization: DeepL-Auth-Key $DEEPL_KEY"             --data-urlencode "text@README.ja.md"             --data-urlencode "target_lang=EN")
+          echo "=== DeepL API Response (first 500 chars) ==="
+          echo "$response" | head -c 500
+          echo ""
+          if echo "$response" | jq -e '.message' > /dev/null 2>&1; then
+            echo "DeepL API Error: $(echo "$response" | jq -r '.message')"
+            exit 1
+          fi
+          translated=$(echo "$response" | jq -r '.translations[0].text // empty')
+          if [ -z "$translated" ] || [ "$translated" = "null" ]; then
+            echo "Error: Translation result is empty or null"
+            echo "Full response: $response"
+            exit 1
+          fi
+          echo "$translated" > README.md
+          echo "Translation completed. Output size: $(wc -c < README.md) bytes"
+
+      # -----------------------------------------------------------------------------
+      # 英語版READMEの先頭へ
+      # 日本語READMEへのリンクを追加する。
+      #
+      # 日本のユーザーから日本語版へアクセスしやすくするため。
+      #
+      # READMEの構造を壊さないよう、
+      # 最初の見出し(#)の直後へ挿入する。
+      # -----------------------------------------------------------------------------
+      - name: Insert Japanese documentation link
+        run: |
+          set -e
+          echo "=== Inserting Japanese documentation link ==="
+          echo "--- First 5 lines of README.md before insertion ---"
+          head -n 5 README.md
+          echo "---"
+
+          # 日本語導線を一時ファイルに書き出し（YAML構文問題を回避）
+          printf '%s\n' '* 🇯🇵 日本語ドキュメント (Japanese Documentation)は **[README.ja.md](./README.ja.md)** をご覧ください。' '' '---' '' > /tmp/ja_link.txt
+
+          # 最初の#で始まる行を検出
+          FIRST_HASH_LINE=$(grep -n '^#' README.md | head -n 1 | cut -d: -f1)
+
+          if [ -n "$FIRST_HASH_LINE" ] && [ "$FIRST_HASH_LINE" -gt 0 ]; then
+            echo "First heading found at line $FIRST_HASH_LINE"
+            head -n "$FIRST_HASH_LINE" README.md > /tmp/README_new.md
+            cat /tmp/ja_link.txt >> /tmp/README_new.md
+            tail -n +$((FIRST_HASH_LINE + 1)) README.md >> /tmp/README_new.md
+            mv /tmp/README_new.md README.md
+            echo "Link inserted after line $FIRST_HASH_LINE"
+          else
+            echo "No heading found. Inserting at the top of the file."
+            cat /tmp/ja_link.txt > /tmp/README_new.md
+            cat README.md >> /tmp/README_new.md
+            mv /tmp/README_new.md README.md
+          fi
+
+          echo "=== First 15 lines of README.md after insertion ==="
+          head -n 15 README.md
+          echo "=== Insertion complete. File size: $(wc -c < README.md) bytes ==="
+
+      # -----------------------------------------------------------------------------
+      # 翻訳結果の検証
+      #
+      # ・README.mdが存在するか
+      # ・サイズが0ではないか
+      #
+      # を確認し、
+      # 異常時はWorkflowを停止する。
+      # -----------------------------------------------------------------------------
+      - name: Verify translation output
+        run: |
+          echo "=== Verifying README.md ==="
+          if [ ! -f "README.md" ]; then
+            echo "Error: README.md was not created!"
+            exit 1
+          fi
+          OUTPUT_SIZE=$(wc -c < README.md)
+          echo "README.md size: $OUTPUT_SIZE bytes"
+          if [ "$OUTPUT_SIZE" -eq 0 ]; then
+            echo "Error: README.md is empty!"
+            exit 1
+          fi
+          echo "First 500 chars of translated README.md:"
+          head -c 500 README.md
+          echo ""
+          echo "Verification passed."
+
+      # -----------------------------------------------------------------------------
+      # README.md に変更があった場合のみCommitする。
+      #
+      # 差分が無い場合はCommitしないため
+      # 不要なコミット履歴が増えない。
+      # -----------------------------------------------------------------------------
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          if ! git diff --exit-code README.md; then
+            git add README.md
+            git commit -m "docs: Automatically translate README.ja.md to English [skip ci]"
+            git push
+          else
+            echo "No changes in README.md"
+          fi
