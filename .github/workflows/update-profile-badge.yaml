@@ -1,0 +1,243 @@
+# .github/workflows/update-profile-badge.yaml
+# ============================================
+# ワークフロー名: Markdownファイル内のプロフィールバッジを自動更新
+# ============================================
+# このワークフローは、指定されたMarkdownファイル内の
+# <!-- PROFILE_BADGE_START --> ～ <!-- PROFILE_BADGE_END -->
+# タグで囲まれた領域を、最新のプロフィールバッジに自動置換します。
+# ============================================
+name: Update Profile Badge in Markdown Files
+
+# ============================================
+# トリガー設定
+# ============================================
+on:
+  push:
+    branches:
+      # 本番ブランチ(main)では実行しない（開発ブランチでのみ動作）
+      # - main
+      - develop
+    paths:
+      # 全Markdownファイルの変更時に実行する場合（現在は無効化）
+      # - '**/*.md'
+      # ワークフロー定義ファイル自身が変更された場合に実行
+      - '.github/workflows/update-profile-badge.yaml'
+
+  # GitHub上の「Run workflow」ボタンによる手動実行も許可
+  workflow_dispatch:
+
+# ============================================
+# ジョブ定義
+# ============================================
+jobs:
+  update-badge:
+    # Ubuntu最新版で実行
+    runs-on: ubuntu-latest
+    permissions:
+      # リポジトリへの書き込み権限が必要（コミット・プッシュ用）
+      contents: write
+
+    steps:
+      # ----------------------------------------
+      # Step 1: リポジトリのチェックアウト
+      # ----------------------------------------
+      # ワークフローが実行されるリポジトリのソースコードを取得
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # ----------------------------------------
+      # Step 2: 対象のMarkdownファイルを検出
+      # ----------------------------------------
+      # pushイベント時: 直近のコミットで変更された.mdファイルから、
+      #               バッジタグを含むもののみを抽出
+      # 手動実行時:    リポジトリ内の全.mdファイルから、
+      #               バッジタグを含むものを抽出
+      # ----------------------------------------
+      - name: Find target Markdown files
+        id: find-files
+        run: |
+          # エラーが発生した時点でスクリプトを終了（厳格モード）
+          set -e
+          echo "=== Finding Markdown files with badge tags ==="
+
+          # ------------------------------------------------
+          # イベント種別に応じて対象ファイルの検出方法を分岐
+          # ------------------------------------------------
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Detecting changed .md files from push..."
+
+            # 直近のコミット(HEAD~1→HEAD)で変更された.mdファイルを取得
+            # 初回コミットなどでHEAD~1が存在しない場合のフォールバックとして、
+            # ステージング済み・追加・変更・リネーム(ACM)のファイルも対象とする
+            changed_files=$(git diff --name-only HEAD~1 HEAD -- '*.md' 2>/dev/null || git diff --name-only --diff-filter=ACM HEAD -- '*.md')
+
+            # 変更されたMarkdownファイルがない場合は後続ステップをスキップ
+            if [ -z "$changed_files" ]; then
+              echo "No .md files changed in this push."
+              echo "has_target=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            # 変更されたファイルのうち、PROFILE_BADGE_STARTタグを含むもののみを対象とする
+            # 空行・存在しないファイルはスキップ
+            echo "$changed_files" | while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              [ ! -f "$file" ] && continue
+              if grep -q "<!-- PROFILE_BADGE_START -->" "$file"; then
+                echo "$file"
+              fi
+            done > /tmp/target_files.txt
+          else
+            # workflow_dispatch（手動実行）時の処理
+            echo "workflow_dispatch: targeting all .md files with badge tags"
+
+            # リポジトリ内の全.mdファイルを検索
+            # .github/ と node_modules/ は除外
+            find . -name '*.md' -not -path './.github/*' -not -path './node_modules/*' | while IFS= read -r file; do
+              # 先頭の "./" を除去して相対パスを正規化
+              file=$(echo "$file" | sed 's|^./||')
+              [ ! -f "$file" ] && continue
+              # バッジ開始タグを含むファイルのみを抽出
+              if grep -q "<!-- PROFILE_BADGE_START -->" "$file"; then
+                echo "$file"
+              fi
+            done > /tmp/target_files.txt
+          fi
+
+          # 検出結果をログ出力
+          echo "Target files:"
+          cat /tmp/target_files.txt
+
+          # ------------------------------------------------
+          # 対象ファイルの有無を判定し、後続ステップへの出力を設定
+          # ------------------------------------------------
+          file_count=$(wc -l < /tmp/target_files.txt | tr -d ' ')
+          if [ "$file_count" -eq 0 ]; then
+            echo "No target files found."
+            # 後続ステップのif条件で参照する出力変数を設定
+            echo "has_target=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found $file_count target file(s)."
+            echo "has_target=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ----------------------------------------
+      # Step 3: バッジ内容を更新
+      # ----------------------------------------
+      # 検出されたMarkdownファイル内のバッジ領域を、
+      # 定義済みの最新バッジに置き換える
+      # ----------------------------------------
+      - name: Update profile badges
+        # 対象ファイルが存在する場合のみ実行
+        if: ${{ steps.find-files.outputs.has_target == 'true' }}
+        run: |
+          set -e
+          echo "=== Updating profile badges ==="
+
+          # ------------------------------------------------
+          # 新しいバッジ内容を一時ファイルに書き出し
+          # ------------------------------------------------
+          # 以下のバッジを定義:
+          # - GitHub プロフィール
+          # - Qiita プロフィール
+          # - Zenn プロフィール
+          # - LinkedIn プロフィール
+          printf '%s\n' '<!-- PROFILE_BADGE_START -->' '' '[![GitHub](https://img.shields.io/badge/GitHub-Profile-181717?logo=github)](https://github.com/8alfalfa8)' '[![Qiita](https://img.shields.io/badge/Qiita-Profile-55C500?logo=qiita&logoColor=white)](https://qiita.com/8alfalfa8)' '[![Zenn](https://img.shields.io/badge/Zenn-Profile-3EA8FF?logo=zenn&logoColor=white)](https://zenn.dev/8alfalfa8)' '[![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/8alfalfa8)' '' '<!-- PROFILE_BADGE_END -->' > /tmp/new_badge.txt
+
+          # 更新したファイル数のカウンタ
+          changed_count=0
+
+          # ------------------------------------------------
+          # 対象ファイルを1件ずつ処理
+          # ------------------------------------------------
+          while IFS= read -r file; do
+            # 空行や存在しないファイルはスキップ
+            [ -z "$file" ] && continue
+            [ ! -f "$file" ] && continue
+
+            echo "Processing: $file"
+
+            # 開始タグ・終了タグの両方が存在するか確認
+            # どちらか一方でも欠けている場合は安全のためスキップ
+            if ! grep -q "<!-- PROFILE_BADGE_START -->" "$file"; then
+              echo "  PROFILE_BADGE_START not found. Skipping."
+              continue
+            fi
+            if ! grep -q "<!-- PROFILE_BADGE_END -->" "$file"; then
+              echo "  PROFILE_BADGE_END not found. Skipping."
+              continue
+            fi
+
+            # ------------------------------------------------
+            # awkを使用してタグ間の内容を置換
+            # ------------------------------------------------
+            # 処理の流れ:
+            # 1. PROFILE_BADGE_START にマッチしたら、タグ自体を出力
+            # 2. 一時ファイル(/tmp/new_badge.txt)から新しいバッジ内容を読み込み、
+            #    タグ自体(START/END)を除いた行を出力
+            # 3. 読み込み完了後、元ファイルのSTART～ENDの間の行をスキップ(skip=1)
+            # 4. PROFILE_BADGE_END にマッチしたらスキップ解除(skip=0)し、タグを出力
+            # 5. スキップ中でない行はそのまま出力
+            awk '
+              /<!-- PROFILE_BADGE_START -->/ {
+                print
+                while ((getline line < "/tmp/new_badge.txt") > 0) {
+                  if (line !~ /<!-- PROFILE_BADGE_(START|END) -->/) {
+                    print line
+                  }
+                }
+                close("/tmp/new_badge.txt")
+                skip = 1
+                next
+              }
+              /<!-- PROFILE_BADGE_END -->/ {
+                skip = 0
+                print
+                next
+              }
+              !skip { print }
+            ' "$file" > /tmp/md_updated.md
+
+            # 一時ファイルを元ファイルで上書き
+            mv /tmp/md_updated.md "$file"
+            changed_count=$((changed_count + 1))
+            echo "  Badge updated."
+          done < /tmp/target_files.txt
+
+          # 処理結果をログ・出力変数に記録
+          echo "=== Total files modified: $changed_count ==="
+          echo "modified_count=$changed_count" >> "$GITHUB_OUTPUT"
+
+      # ----------------------------------------
+      # Step 4: 変更をコミット＆プッシュ
+      # ----------------------------------------
+      # バッジ更新後の変更をGitHubに反映
+      # [skip ci] を含めることで、コミット後に再びCIが発火するのを防止
+      # ----------------------------------------
+      - name: Commit and Push changes
+        # 対象ファイルが存在する場合のみ実行
+        if: ${{ steps.find-files.outputs.has_target == 'true' }}
+        run: |
+          set -e
+          echo "=== Committing changes ==="
+
+          # Gitコミット用のユーザー情報を設定（GitHub Actions公式のデフォルト値）
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # すべての変更をステージング
+          git add -A
+
+          # ステージングされた変更がない場合は終了（無駄なコミットを防ぐ）
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          # 変更をコミット
+          # [skip ci] を付与して、コミット後に再度ワークフローが実行されるのを防止
+          git commit -m "chore: Update profile badges in Markdown files [skip ci]"
+
+          # リモートリポジトリにプッシュ
+          git push
+          echo "Changes pushed successfully."
